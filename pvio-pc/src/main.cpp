@@ -26,6 +26,8 @@
 #include <pvio/pvio.h>
 #include <dataset_reader.h>
 #include <output_writer.h>
+#include <opencv2/core/utility.hpp>
+#include <opencv2/core/cvstd.hpp>
 
 #define TARGET_FPS (30)
 #define glsl_code(str) "#version 330\n" #str
@@ -127,7 +129,7 @@ class PVIOPcVisualizer : public nanovis::NanoVis {
     std::unique_ptr<OutputWriter> output_writer;
 
   public:
-    PVIOPcVisualizer(const std::string &data_path, const std::string &yaml_path) {
+    PVIOPcVisualizer(const std::string &data_path, const std::string &yaml_path, const std::string &output_file) {
         // [1] data
         dataset_reader = DatasetReader::create_reader(data_path);
         if (!dataset_reader) {
@@ -201,7 +203,7 @@ class PVIOPcVisualizer : public nanovis::NanoVis {
 
         K = pvio_config->camera_intrinsic();
 
-        output_writer = std::make_unique<TumOutputWriter>("trajectory.tum");
+        output_writer = std::make_unique<TumOutputWriter>(output_file);
     }
 
     bool step() {
@@ -488,36 +490,60 @@ void force_run_visualizer(PVIOPcVisualizer &vis, bool draw = false) {
 }
 
 int main(int argc, const char *argv[]) {
-    if (argc < 3) {
-        std::cerr << "Not enough arguments provided" << std::endl;
-        return EXIT_FAILURE;
+
+    std::string keys = 
+    "{help h | | print usage information}"
+    "{type t | | dataset type, must be one of [euroc, tumvi]}"
+    "{config c | | path to the config file for the dataset}"
+    "{dataset d | | path to the dataset directory}"
+    "{mode m |default | Mode to run PVIO in: [default, automatic, headless]}"
+    "{output_file o |trajectory.tum | path for output to log the estimated trajectory}"
+    ;
+
+    cv::CommandLineParser parser(argc, argv, keys);
+    if (parser.has("help")) {
+        parser.printMessage();
+        exit(EXIT_SUCCESS);
     }
 
-    PVIOPcVisualizer visualizer(argv[1], argv[2]);
-    std::cout << "HERE1" << std::endl;
-    if (argc > 3) {
-        std::cout << "HERE2" << std::endl;
-        std::string mode(argv[3]);
-        if (mode == "default") {
-            visualizer.show();
-            nanovis::main(1);
-        }
-        else if (mode == "automatic") {
-            std::cerr << "automatic mode is not fully implmemented" << std::endl;
-            exit(EXIT_FAILURE);
-            // visualizer.show();
-            // force_run_visualizer(visualizer, true);
-        }
-        else if (mode == "headless") {
-            force_run_visualizer(visualizer, false);
-        } else {
-            std::cerr << "Unknown argument provided - must be one of [default, automatic, headless]" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-    } else { 
-        std::cout << "HERE3" << std::endl;
+    if (!parser.check()) {
+        parser.printErrors();
+        parser.printMessage();
+        exit(EXIT_FAILURE);
+    }
+
+    // Check parser args:
+    if (!parser.has("type") || !parser.has("dataset") || !parser.has("config")) {
+        std::cerr << "Please specify values for the --type, --config and --dataset flags" << std::endl;
+        parser.printMessage();
+        exit(EXIT_FAILURE);
+    }
+
+    std::string dataset_arg = parser.get<std::string>("type") + "://" + parser.get<std::string>("dataset");
+
+    std::cout << "Dataset: " << dataset_arg << std::endl;
+    std::cout << "type: " << parser.get<std::string>("type") << std::endl;
+
+    std::string config = parser.get<std::string>("config");
+    std::string output_file = parser.get<std::string>("output_file");
+    PVIOPcVisualizer visualizer(dataset_arg, config, output_file);
+    
+    std::string mode = parser.get<std::string>("mode");
+    if (mode == "default") {
         visualizer.show();
         nanovis::main(1);
+    }
+    else if (mode == "automatic") {
+        std::cerr << "automatic mode is not fully implmemented" << std::endl;
+        exit(EXIT_FAILURE);
+        // visualizer.show();
+        // force_run_visualizer(visualizer, true);
+    }
+    else if (mode == "headless") {
+        force_run_visualizer(visualizer, false);
+    } else {
+        std::cerr << "Unknown argument provided - must be one of [default, automatic, headless]" << std::endl;
+        exit(EXIT_FAILURE);
     }
 
     return 0;

@@ -12,11 +12,16 @@ For compilation:
 * Tested in Ubuntu 18.04 (with GCC 9.0 and CMake 3.11), and macOS 10.14.
 
 For execution:
-* `./pvio-pc [data_scheme]://[data_path] [config_yaml_path]`
+* `./pvio-pc -t=[data_scheme] -d=[data_path] -c=[config_yaml_path]`
+* Optional args are:
+  *  `-m` for the mode which is one of:
+     * `default`: run the full visualization system and log the output trajectory
+     * `headless`: run PVIO without the visualization and just generate the output trajectory. The default value is `default`.
+  * `-o` for specifying the path for the output file. The default value is `trajectory.tum`
+  * `-h` which displays information about the supported commandline arguments
   * e.g.
-    * For EuRoC Dataset: `build/pvio-pc/pvio-pc euroc:///Data/EuRoC/V1_01_easy/mav0 config/euroc.yaml`
-    * For TUM-VI Dataset: `build/pvio-pc/pvio-pc tumvi:///Data/TUM_VI/dataset-room1_512_16/mav0 config/tum_vi.yaml`
-* The trajectory will be written in `trajectory.tum`.
+    * For EuRoC Dataset: `build/pvio-pc/pvio-pc -t=euroc -d=/Data/EuRoC/V1_01_easy/mav0 -cconfig/euroc.yaml`
+    * For TUM-VI Dataset: `build/pvio-pc/pvio-pc -t=tumvi -d=/Data/TUM_VI/dataset-room1_512_16/mav0 -c=config/tum_vi.yaml`
 
 ## Publication
 
