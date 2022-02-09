@@ -38,7 +38,7 @@ std::unique_ptr<DatasetReader> DatasetReader::create_reader(const std::string &f
         return std::make_unique<LegacySensorsDatasetReader>(path.value());
     } else if (auto path = path_from_scheme(filename, "euroc://")) {
         return std::make_unique<EurocDatasetReader>(path.value());
-    } else if (auto path = path_from_scheme(filename, "tum://")) {
+    } else if (auto path = path_from_scheme(filename, "tumvi://")) {
         return std::make_unique<TUMDatasetReader>(path.value()); 
     } else {
         return nullptr;

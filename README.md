@@ -15,7 +15,7 @@ For execution:
 * `./pvio-pc [data_scheme]://[data_path] [config_yaml_path]`
   * e.g.
     * For EuRoC Dataset: `build/pvio-pc/pvio-pc euroc:///Data/EuRoC/V1_01_easy/mav0 config/euroc.yaml`
-    * For TUM-VI Dataset: `build/pvio-pc/pvio-pc tum:///Data/TUM_VI/dataset-room1_512_16/mav0 config/tum_vi.yaml`
+    * For TUM-VI Dataset: `build/pvio-pc/pvio-pc tumvi:///Data/TUM_VI/dataset-room1_512_16/mav0 config/tum_vi.yaml`
 * The trajectory will be written in `trajectory.tum`.
 
 ## Publication
