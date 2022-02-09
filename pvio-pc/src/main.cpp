@@ -349,7 +349,7 @@ class PVIOPcVisualizer : public nanovis::NanoVis {
         }
     }
 
-  private:
+//   private:
     void draw() override {
         shader.bind();
         shader.setUniform("model_view_proj", model_view_proj());
@@ -476,12 +476,49 @@ class PVIOPcVisualizer : public nanovis::NanoVis {
     }
 };
 
+void force_run_visualizer(PVIOPcVisualizer &vis, bool draw = false) {
+    size_t count = 0;
+    while(vis.step()) {
+        std::cout << "Step: " << count << std::endl;
+        count++;
+        if (draw) {
+            vis.draw();
+        }
+    }
+}
+
 int main(int argc, const char *argv[]) {
     if (argc < 3) {
+        std::cerr << "Not enough arguments provided" << std::endl;
         return EXIT_FAILURE;
     }
+
     PVIOPcVisualizer visualizer(argv[1], argv[2]);
-    visualizer.show();
-    nanovis::main(1);
+    std::cout << "HERE1" << std::endl;
+    if (argc > 3) {
+        std::cout << "HERE2" << std::endl;
+        std::string mode(argv[3]);
+        if (mode == "default") {
+            visualizer.show();
+            nanovis::main(1);
+        }
+        else if (mode == "automatic") {
+            std::cerr << "automatic mode is not fully implmemented" << std::endl;
+            exit(EXIT_FAILURE);
+            // visualizer.show();
+            // force_run_visualizer(visualizer, true);
+        }
+        else if (mode == "headless") {
+            force_run_visualizer(visualizer, false);
+        } else {
+            std::cerr << "Unknown argument provided - must be one of [default, automatic, headless]" << std::endl;
+            exit(EXIT_FAILURE);
+        }
+    } else { 
+        std::cout << "HERE3" << std::endl;
+        visualizer.show();
+        nanovis::main(1);
+    }
+
     return 0;
 }
